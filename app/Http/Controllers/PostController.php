@@ -52,7 +52,10 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
-        return view('posts.edit', ['post' => Post::findOrFail($id)]);
+        $post = Post::findOrFail($id);
+        $this->authorize('update', $post);
+
+        return view('posts.edit', ['post' => $post]);
     }
 
     /**
@@ -60,11 +63,13 @@ class PostController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $post = Post::findOrFail($id);
+        $this->authorize('update', $post);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
         ]);
-        $post = Post::findOrFail($id);
         $post->update($validated);
 
         return redirect()->route('posts.show', $post->id)->with('status', 'Post successfully updated!');
@@ -75,6 +80,10 @@ class PostController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $post = Post::findOrFail($id);
+        $this->authorize('delete', $post);
+        $post->delete();
+
+        return redirect()->route('posts.index')->with('status', 'Post successfully deleted!');
     }
 }
