@@ -28,6 +28,16 @@
                         {!! nl2br(e($post->body)) !!}
                     </div>
 
+                    <div class="mt-6">
+                        @forelse ($post->tags as $tag)
+                            <span
+                                class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+                                #{{ $tag->name }}
+                            </span>
+                        @empty
+                        @endforelse
+                    </div>
+
                     <hr class="my-6">
                     <div class="mt-6">
                         <h3 class="font-bold text-lg mb-2">Leave a comment</h3>

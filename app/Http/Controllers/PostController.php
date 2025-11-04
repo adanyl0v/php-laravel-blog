@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -12,7 +13,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with('user')->latest()->paginate(10);
+        $posts = Post::with(['user', 'tags'])->latest()->paginate(10);
 
         return view('posts.index', compact('posts'));
     }
@@ -25,10 +26,20 @@ class PostController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
         ]);
-        $post = auth()->user()->posts()->create($validated);
 
-        return redirect()->route('posts.show', $post->id);
+        $post = auth()->user()->posts()->create([
+            'title' => $validated['title'],
+            'body' => $validated['body'],
+        ]);
+
+        if (! empty($validated['tags'])) {
+            $post->tags()->sync($validated['tags']);
+        }
+
+        return redirect()->route('posts.show', $post);
     }
 
     /**
@@ -36,16 +47,17 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('posts.create');
+        $tags = Tag::orderBy('name')->get();
+
+        return view('posts.create', compact('tags'));
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Post $post)
     {
-        $post = Post::findOrFail($id);
-        $post->load(['user', 'comments.user']);
+        $post->load(['user', 'comments.user', 'tags']);
 
         return view('posts.show', ['post' => $post]);
     }
@@ -53,27 +65,38 @@ class PostController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Post $post)
     {
-        $post = Post::findOrFail($id);
         $this->authorize('update', $post);
 
-        return view('posts.edit', ['post' => $post]);
+        $tags = Tag::orderBy('name')->get();
+
+        return view('posts.edit', [
+            'post' => $post,
+            'tags' => $tags,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Post $post)
     {
-        $post = Post::findOrFail($id);
         $this->authorize('update', $post);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
         ]);
-        $post->update($validated);
+
+        $post->update([
+            'title' => $validated['title'],
+            'body' => $validated['body'],
+        ]);
+
+        $post->tags()->sync($validated['tags'] ?? []);
 
         return redirect()->route('posts.show', $post->id)->with('status', 'Post successfully updated!');
     }
@@ -81,10 +104,10 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Post $post)
     {
-        $post = Post::findOrFail($id);
         $this->authorize('delete', $post);
+
         $post->delete();
 
         return redirect()->route('posts.index')->with('status', 'Post successfully deleted!');

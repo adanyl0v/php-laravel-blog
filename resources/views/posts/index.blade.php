@@ -26,6 +26,14 @@
                             <p class="mt-2">
                                 {{ Str::limit($post->body, 150) }}
                             </p>
+                            <div class="mt-3">
+                                @foreach ($post->tags as $tag)
+                                    <span
+                                        class="inline-block bg-gray-100 rounded-full px-2 py-1 text-xs font-semibold text-gray-600 mr-1">
+                                        #{{ $tag->name }}
+                                    </span>
+                                @endforeach
+                            </div>
                             <div class="mt-4">
                                 <a href="{{ route('posts.show', $post) }}"
                                    class="text-indigo-600 hover:text-indigo-900">

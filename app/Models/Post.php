@@ -24,4 +24,9 @@ class Post extends Model
     {
         return $this->hasMany(Comment::class)->orderBy('created_at', 'asc');
     }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
 }
