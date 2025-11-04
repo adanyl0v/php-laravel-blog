@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Blog') }}
+            Posts by tag: #{{ $tag->name }}
         </h2>
     </x-slot>
 
@@ -9,13 +9,6 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-
-                    <div class="mb-4">
-                        <a href="{{ route('posts.create') }}"
-                           class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            New post
-                        </a>
-                    </div>
 
                     @forelse ($posts as $post)
                         <div class="mb-4 p-4 border rounded-md">
@@ -27,12 +20,13 @@
                                 {{ Str::limit($post->body, 150) }}
                             </p>
                             <div class="mt-3">
-                                @foreach ($post->tags as $tag)
+                                @forelse ($post->tags as $tag)
                                     <a href="{{ route('tags.show', $tag->slug) }}"
-                                       class="inline-block bg-gray-100 rounded-full px-2 py-1 text-xs font-semibold text-gray-600 mr-1 hover:bg-gray-300">
+                                       class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 hover:bg-gray-300">
                                         #{{ $tag->name }}
                                     </a>
-                                @endforeach
+                                @empty
+                                @endforelse
                             </div>
                             <div class="mt-4">
                                 <a href="{{ route('posts.show', $post) }}"

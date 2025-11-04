@@ -30,17 +30,17 @@
                     <p class="text-sm text-gray-600">
                         Author: {{ $post->user->name }} | {{ $post->created_at->format('d.m.Y H:i') }}
                     </p>
-                    
+
                     <div class="mt-6 prose max-w-none">
                         {!! nl2br(e($post->body)) !!}
                     </div>
 
                     <div class="mt-6">
                         @forelse ($post->tags as $tag)
-                            <span
-                                class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+                            <a href="{{ route('tags.show', $tag->slug) }}"
+                               class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 hover:bg-gray-300">
                                 #{{ $tag->name }}
-                            </span>
+                            </a>
                         @empty
                         @endforelse
                     </div>
